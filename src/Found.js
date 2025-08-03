@@ -84,7 +84,7 @@ const Found = () => {
       return;
     }
 
-    axios.post('http://13.61.175.26:3001/api/found/found',{founditem,founddatetime,foundlocation,findercontact,founddescription,email: user.email,})
+    axios.post('http://13.49.244.15:3001/api/found/found',{founditem,founddatetime,foundlocation,findercontact,founddescription,email: user.email,})
     .then(result => {
       console.log(result)
       // Clear inputs

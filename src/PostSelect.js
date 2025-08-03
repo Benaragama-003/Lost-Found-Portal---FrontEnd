@@ -13,7 +13,7 @@ import './index.css';
 import { styled } from '@mui/material/styles';
 import Header from './header';
 import Footer from './footer';
-
+import animationData from './assets/lost-found-anim.json';
 
 const PageContainer = styled(Box)(({ theme }) => ({
   minHeight: '100vh',
@@ -60,6 +60,9 @@ const PostSelect = () => {
             <Typography variant="h4" sx={{ fontWeight: 700, mb: 2, color: '#0f172a' }}>
               What would you like to post?
             </Typography>
+            <Box sx={{ maxWidth: 320, mx: 'auto', mb: 2 }}>
+                        <Lottie animationData={animationData} loop />
+                      </Box>
             <Typography variant="body1" sx={{ mb: 4, color: '#475569' }}>
               Choose whether you want to post a Lost Item or Found Item. Help your university community reconnect with their belongings.
             </Typography>

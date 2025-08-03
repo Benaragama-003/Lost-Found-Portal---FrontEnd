@@ -109,7 +109,7 @@ const Login = () => {
     e.preventDefault();
 
     axios
-      .post('http://13.61.175.26:3001/api/users/login', { email, password })
+      .post('http://13.49.244.15:3001/api/users/login', { email, password })
       .then((res) => {
         if (res.data.success) {
           setErrorMsg('');
