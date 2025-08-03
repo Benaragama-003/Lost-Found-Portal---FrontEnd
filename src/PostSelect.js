@@ -10,6 +10,7 @@ import {
   Paper
 } from '@mui/material';
 import './index.css';
+import Lottie from 'lottie-react';
 import { styled } from '@mui/material/styles';
 import Header from './header';
 import Footer from './footer';
