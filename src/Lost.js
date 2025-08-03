@@ -89,7 +89,7 @@ const Lost = () => {
       return;
     }
     axios
-      .post('http://localhost:3001/api/lost/lost', {
+      .post(process.env.ENDPOINT +'/api/lost/lost', {
         lostitem,
         lostdatetime,
         lostlocation,
