@@ -94,11 +94,11 @@ const HomePage = () => {
       foundRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
 
-    axios.get('http://localhost:3001/api/lost')
+    axios.get(process.env.ENDPOINT + '/api/lost')
       .then(res => setLostItems(res.data))
       .catch(err => console.error('Error fetching lost items:', err));
 
-    axios.get('http://localhost:3001/api/found')
+    axios.get(process.env.ENDPOINT + '/api/found')
       .then(res => setFoundItems(res.data))
       .catch(err => console.error('Error fetching found items:', err));
   }, [location]);
