@@ -113,8 +113,8 @@ const AdminHomePage = () => {
     setLoading(true);
     setError('');
     try {
-      const lost = await axios.get(process.env.ENDPOINT + '/api/lost');
-      const found = await axios.get(process.env.ENDPOINT + '/api/found');
+      const lost = await axios.get('http://13.61.175.26:3001/api/lost');
+      const found = await axios.get('http://13.61.175.26:3001/api/found');
       setLostItems(lost.data);
       setFoundItems(found.data);
     } catch (err) {
@@ -125,7 +125,7 @@ const AdminHomePage = () => {
 
   const fetchUsers = () => {
     setError('');
-    axios.get(process.env.ENDPOINT + '/api/users')
+    axios.get('http://13.61.175.26:3001/api/users')
       .then(res => setUsers(res.data))
       .catch(() => setError('Unable to fetch user data. Please check your connection.'));
   };
@@ -133,7 +133,7 @@ const AdminHomePage = () => {
   const fetchSuggestedMatches = async () => {
     setMatchLoading(true);
     try {
-      const res = await axios.get(process.env.ENDPOINT + '/api/matches/suggested-matches');
+      const res = await axios.get('http://13.61.175.26:3001/api/matches/suggested-matches');
       setAiMatches(res.data.matches);
     } catch (err) {
       console.error("Error fetching matches:", err);
@@ -149,7 +149,7 @@ const AdminHomePage = () => {
 
   const confirmDeleteItem = async () => {
     const { id, collection } = deleteInfo;
-    await axios.delete(process.env.ENDPOINT + `/api/${collection}/${id}`);
+    await axios.delete(`http://13.61.175.26:3001/api/${collection}/${id}`);
     setConfirmDelete(false);
     fetchData();
   };
@@ -161,13 +161,13 @@ const AdminHomePage = () => {
   };
 
   const handleDialogSave = async () => {
-    await axios.put(process.env.ENDPOINT + `/api/${type}/${editItem._id}`, editItem);
+    await axios.put(`http://13.61.175.26:3001/api/${type}/${editItem._id}`, editItem);
     setDialogOpen(false);
     fetchData();
   };
 
   const toggleBan = (id) => {
-    axios.patch(process.env.ENDPOINT + `/api/users/${id}/toggle-ban`)
+    axios.patch(`http://13.61.175.26:3001/api/users/${id}/toggle-ban`)
       .then(() => fetchUsers())
       .catch(() => setError('Could not update user ban status.'));
   };
@@ -338,8 +338,8 @@ const NavButton = styled(Button)(({ theme }) => ({
   const openUserProfile = async (user) => {
   try {
     const [lostRes, foundRes] = await Promise.all([
-      axios.get(process.env.ENDPOINT + `/api/lost?email=${user.email}`),
-      axios.get(process.env.ENDPOINT + `/api/found?email=${user.email}`)
+      axios.get(`http://13.61.175.26:3001/api/lost?email=${user.email}`),
+      axios.get(`http://13.61.175.26:3001/api/found?email=${user.email}`)
     ]);
 
     const extendedUser = {
@@ -358,7 +358,7 @@ const NavButton = styled(Button)(({ theme }) => ({
 
   const handleApproveMatch = async (lostItemId, foundItemId) => {
   try {
-    const res = await axios.post(process.env.ENDPOINT + '/api/match/approve', {
+    const res = await axios.post('http://13.61.175.26:3001/api/match/approve', {
       lostItemId,
       foundItemId,
     });
