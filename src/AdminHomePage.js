@@ -73,106 +73,7 @@ const StyledLink = styled(Link)(({ theme }) => ({
   },
 }));
 
-const PIE_COLORS = ['#4caf50', '#f44336'];
-
-const AdminHomePage = () => {
-  const [lostItems, setLostItems] = useState([]);
-  const [foundItems, setFoundItems] = useState([]);
-  const [editItem, setEditItem] = useState(null);
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false);
-  const [deleteInfo, setDeleteInfo] = useState({ id: '', collection: '' });
-  const [type, setType] = useState('');
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [timeFilter, setTimeFilter] = useState('monthly');
-  const [selectedUser, setSelectedUser] = useState(null);
-  const [profileOpen, setProfileOpen] = useState(false);
-  const [aiMatches, setAiMatches] = useState([]);
-  const [matchLoading, setMatchLoading] = useState(false);
-
-  const userRef = useRef(null);
-  const lostRef = useRef(null);
-  const foundRef = useRef(null);
-  const analyticsRef = useRef(null);
-
-  // Quick stat counts
-  const lostCount = lostItems.length;
-  const foundCount = foundItems.length;
-  const userCount = users.length;
-  const bannedCount = users.filter(u => u.isBanned).length;
-
-  useEffect(() => {
-    fetchData();
-    fetchUsers();
-    fetchSuggestedMatches();
-  }, []);
-
-  const fetchData = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const lost = await axios.get('http://13.61.175.26:3001/api/lost');
-      const found = await axios.get('http://13.61.175.26:3001/api/found');
-      setLostItems(lost.data);
-      setFoundItems(found.data);
-    } catch (err) {
-      setError('Unable to fetch item data. Please check your connection.');
-    }
-    setLoading(false);
-  };
-
-  const fetchUsers = () => {
-    setError('');
-    axios.get('http://13.61.175.26:3001/api/users')
-      .then(res => setUsers(res.data))
-      .catch(() => setError('Unable to fetch user data. Please check your connection.'));
-  };
-
-  const fetchSuggestedMatches = async () => {
-    setMatchLoading(true);
-    try {
-      const res = await axios.get('http://13.61.175.26:3001/api/matches/suggested-matches');
-      setAiMatches(res.data.matches);
-    } catch (err) {
-      console.error("Error fetching matches:", err);
-    } finally {
-      setMatchLoading(false);
-    }
-  };
-
-  const handleDelete = (id, collection) => {
-    setDeleteInfo({ id, collection });
-    setConfirmDelete(true);
-  };
-
-  const confirmDeleteItem = async () => {
-    const { id, collection } = deleteInfo;
-    await axios.delete(`http://13.61.175.26:3001/api/${collection}/${id}`);
-    setConfirmDelete(false);
-    fetchData();
-  };
-
-  const handleUpdate = (item, collection) => {
-    setEditItem(item);
-    setType(collection);
-    setDialogOpen(true);
-  };
-
-  const handleDialogSave = async () => {
-    await axios.put(`http://13.61.175.26:3001/api/${type}/${editItem._id}`, editItem);
-    setDialogOpen(false);
-    fetchData();
-  };
-
-  const toggleBan = (id) => {
-    axios.patch(`http://13.61.175.26:3001/api/users/${id}/toggle-ban`)
-      .then(() => fetchUsers())
-      .catch(() => setError('Could not update user ban status.'));
-  };
-
-  const HeaderNav = styled(Box)(({ theme }) => ({
+const HeaderNav = styled(Box)(({ theme }) => ({
   width: '100%',
   padding: theme.spacing(2),
   background: 'linear-gradient(to right, #ff7043, #e53935)',
@@ -193,6 +94,145 @@ const NavButton = styled(Button)(({ theme }) => ({
     backgroundColor: 'rgba(255,255,255,0.1)',
   },
 }));
+
+const PIE_COLORS = ['#4caf50', '#f44336'];
+
+const AdminHomePage = () => {
+  const [lostItems, setLostItems] = useState([]);
+  const [foundItems, setFoundItems] = useState([]);
+  const [editItem, setEditItem] = useState(null);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleteInfo, setDeleteInfo] = useState({ id: '', collection: '' });
+  const [type, setType] = useState('');
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [timeFilter, setTimeFilter] = useState('monthly');
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [aiMatches, setAiMatches] = useState([]);
+  const [matchLoading, setMatchLoading] = useState(false);
+  const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [rejectMatchInfo, setRejectMatchInfo] = useState({ lostId: '', foundId: '' });
+
+  const userRef = useRef(null);
+  const lostRef = useRef(null);
+  const foundRef = useRef(null);
+  const analyticsRef = useRef(null);
+
+  // Quick stat counts
+  const lostCount = lostItems.length;
+  const foundCount = foundItems.length;
+  const userCount = users.length;
+  const bannedCount = users.filter(u => u.isBanned).length;
+
+  useEffect(() => {
+    fetchData();
+    fetchUsers();
+    fetchSuggestedMatches();
+  }, []);
+
+  const handleApproveMatch = async (lostItemId, foundItemId) => {
+    try {
+      const res = await axios.post('http://13.49.244.15:3001/api/matches/approve', {
+        lostItemId,
+        foundItemId,
+      });
+      alert(res.data.message);
+      fetchSuggestedMatches(); // Refresh matches
+    } catch (err) {
+      console.error('Approval failed:', err);
+      alert('Failed to approve match');
+    }
+  };
+  const handleRejectConfirm = (lostId, foundId) => {
+    setRejectMatchInfo({ lostId, foundId });
+    setRejectDialogOpen(true);
+  };
+
+  const confirmRejectMatch = async () => {
+    try {
+      const { lostId, foundId } = rejectMatchInfo;
+      const res = await axios.post('http://13.49.244.15:3001/api/matches/reject', {
+        lostItemId: lostId,
+        foundItemId: foundId,
+      });
+      alert(res.data.message);
+      setRejectDialogOpen(false);
+      fetchSuggestedMatches();
+    } catch (err) {
+      console.error('Reject failed:', err);
+      alert('Failed to reject match');
+    }
+  };
+
+  const fetchData = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const lost = await axios.get('http://13.49.244.15:3001/api/lost');
+      const found = await axios.get('http://13.49.244.15:3001/api/found');
+      setLostItems(lost.data);
+      setFoundItems(found.data);
+    } catch (err) {
+      setError('Unable to fetch item data. Please check your connection.');
+    }
+    setLoading(false);
+  };
+
+  const fetchUsers = () => {
+    setError('');
+    axios.get('http://13.49.244.15:3001/api/users')
+      .then(res => setUsers(res.data))
+      .catch(() => setError('Unable to fetch user data. Please check your connection.'));
+  };
+
+  const fetchSuggestedMatches = async () => {
+    setMatchLoading(true);
+    try {
+      const res = await axios.get('http://13.49.244.15:3001/api/matches/suggested-matches');
+      const filtered = res.data.matches.filter(
+        m => m.lostItem.matchStatus === 'pending' && m.foundItem.matchStatus === 'pending'
+      );
+      setAiMatches(filtered);
+    } catch (err) {
+      console.error("Error fetching matches:", err);
+    } finally {
+      setMatchLoading(false);
+    }
+  };
+
+
+  const handleDelete = (id, collection) => {
+    setDeleteInfo({ id, collection });
+    setConfirmDelete(true);
+  };
+
+  const confirmDeleteItem = async () => {
+    const { id, collection } = deleteInfo;
+    await axios.delete(`http://13.49.244.15:3001/api/${collection}/${id}`);
+    setConfirmDelete(false);
+    fetchData();
+  };
+
+  const handleUpdate = (item, collection) => {
+    setEditItem(item);
+    setType(collection);
+    setDialogOpen(true);
+  };
+
+  const handleDialogSave = async () => {
+    await axios.put(`http://13.49.244.15:3001/api/${type}/${editItem._id}`, editItem);
+    setDialogOpen(false);
+    fetchData();
+  };
+
+  const toggleBan = (id) => {
+    axios.patch(`http://13.49.244.15:3001/api/users/${id}/toggle-ban`)
+      .then(() => fetchUsers())
+      .catch(() => setError('Could not update user ban status.'));
+  };
 
    // Helper: group data by month or week based on lostdatetime/founddatetime
   const groupItemsByTime = (items, dateKey, filter) => {
@@ -338,8 +378,8 @@ const NavButton = styled(Button)(({ theme }) => ({
   const openUserProfile = async (user) => {
   try {
     const [lostRes, foundRes] = await Promise.all([
-      axios.get(`http://13.61.175.26:3001/api/lost?email=${user.email}`),
-      axios.get(`http://13.61.175.26:3001/api/found?email=${user.email}`)
+      axios.get(`http://13.49.244.15:3001/api/lost?email=${user.email}`),
+      axios.get(`http://13.49.244.15:3001/api/found?email=${user.email}`)
     ]);
 
     const extendedUser = {
@@ -355,21 +395,6 @@ const NavButton = styled(Button)(({ theme }) => ({
     alert('Failed to load user details.');
   }
   };
-
-  const handleApproveMatch = async (lostItemId, foundItemId) => {
-  try {
-    const res = await axios.post('http://13.61.175.26:3001/api/match/approve', {
-      lostItemId,
-      foundItemId,
-    });
-
-    alert(res.data.message); // You can also use a snackbar
-  } catch (err) {
-    console.error('Approval failed:', err);
-    alert('Failed to approve match');
-  }
-};
-
 
   return (
     <GradientWrapper>
@@ -412,6 +437,59 @@ const NavButton = styled(Button)(({ theme }) => ({
           <Typography variant="body1" align="center" color="error" sx={{ mb: 2 }}>
             {error}
           </Typography>
+        )}
+        {aiMatches.length > 0 && (
+          <SectionCard>
+            <Typography variant="h6" sx={{ fontWeight: 600, mb: 2, color: '#0288d1' }}>
+              AI Match Suggestions
+            </Typography>
+            <StyledTableContainer>
+              <Table>
+                <StyledTableHead>
+                  <TableRow>
+                    <TableCell>Lost Item</TableCell>
+                    <TableCell>Found Item</TableCell>
+                    <TableCell>Date Match</TableCell>
+                    <TableCell>Location</TableCell>
+                    <TableCell>Actions</TableCell>
+                  </TableRow>
+                </StyledTableHead>
+                <TableBody>
+                  {aiMatches.map(match => (
+                    <TableRow key={`${match.lostId}-${match.foundId}`}>
+                      <TableCell>{match.lostItem.lostitem}</TableCell>
+                      <TableCell>{match.foundItem.founditem}</TableCell>
+                      <TableCell>
+                        {new Date(match.lostItem.lostdatetime).toLocaleDateString()} /{' '}
+                        {new Date(match.foundItem.founddatetime).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell>{match.lostItem.lostlocation}</TableCell>
+                      <TableCell>
+                        <Stack direction="row" spacing={1}>
+                          <Button
+                            variant="contained"
+                            size="small"
+                            color="success"
+                            onClick={() => handleApproveMatch(match.lostId, match.foundId)}
+                          >
+                            Approve
+                          </Button>
+                          <Button
+                            variant="outlined"
+                            size="small"
+                            color="error"
+                            onClick={() => handleRejectConfirm(match.lostId, match.foundId)}
+                          >
+                            Reject
+                          </Button>
+                        </Stack>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </StyledTableContainer>
+          </SectionCard>
         )}
 
         <Box ref={analyticsRef}>
@@ -735,6 +813,28 @@ const NavButton = styled(Button)(({ theme }) => ({
         </DialogActions>
       </Dialog>
     )}
+
+    <Dialog
+      open={rejectDialogOpen}
+      onClose={() => setRejectDialogOpen(false)}
+      maxWidth="xs"
+      fullWidth
+    >
+      <DialogTitle>Confirm Rejection</DialogTitle>
+      <DialogContent>
+        <Typography>
+          Are you sure you want to reject this match? This action cannot be undone.
+        </Typography>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => setRejectDialogOpen(false)} color="inherit">
+          Cancel
+        </Button>
+        <Button onClick={confirmRejectMatch} color="error" variant="contained">
+          Reject
+        </Button>
+      </DialogActions>
+    </Dialog>
 
     </GradientWrapper>
   );
