@@ -109,7 +109,7 @@ const Login = () => {
     e.preventDefault();
 
     axios
-      .post('http://localhost:3001/api/users/login', { email, password })
+      .post(process.env.ENDPOINT + '/api/users/login', { email, password })
       .then((res) => {
         if (res.data.success) {
           setErrorMsg('');

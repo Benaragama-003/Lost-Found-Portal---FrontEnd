@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'http://localhost:3001/api/auth',  // adjust if deployed or using a proxy
+  baseURL: process.env.ENDPOINT + '/api/auth',  // adjust if deployed or using a proxy
   withCredentials: false, // optional, set to true if you're using cookies
 });
 
