@@ -89,7 +89,7 @@ const Lost = () => {
       return;
     }
     axios
-      .post(process.env.ENDPOINT +'/api/lost/lost', {
+      .post('http://13.61.175.26:3001/api/lost/lost', {
         lostitem,
         lostdatetime,
         lostlocation,
